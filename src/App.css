@@ -1,0 +1,171 @@
+h3{
+  margin: 20px 10px;
+}
+.top{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.left{
+  margin-left: 10px;
+  /* width: 50%; */
+  margin-bottom: 10px;
+}
+input.inputBox {
+  font-size: 13px;
+  padding: 3px 0px 3px 8px;
+  border-radius: 3px;
+  border: 1px solid #666;
+}
+input.inputBox::after{
+  content:'🗓️';
+  font-size: 12px;
+}
+
+.calendarWrap {
+  display: inline-block;
+  position: relative;
+}
+
+.calendarElement {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-35%);
+  top: 40px;
+  border: 1px solid #ccc;
+  z-index: 999;
+}
+.right{
+  display: flex;
+  justify-content: center;
+  margin-right: 10px;
+  border: 1px solid rgb(206, 202, 202);
+  padding: 5px 10px;
+  font-weight: 400;
+  font-size: 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 20px;
+}
+h4{
+  font-weight: 500;
+  font-size: 15px;
+  margin-left:10px;
+}
+.btns{
+  margin: 10px 10px 0px 10px;
+}
+.hiddenitems{
+  margin-bottom: 20px;
+}
+.span{
+  padding:5px 10px;
+  margin:5px;
+  border:  1px solid rgb(202, 198, 198);
+  cursor:pointer;
+  border-radius: 3px;
+  display: inline-block;
+  width: 10%;
+}
+.hidden{
+  margin-bottom: 20px;
+}
+.button{
+  /* display: block; */
+  float:right;
+  cursor: pointer;
+  padding: 10px 15px;
+  margin: 20px 10px;
+ color: blue;
+ background-color: white;
+ border:1px solid  rgb(206, 204, 204);
+ border-radius: 3px;
+}
+.changes{
+  background-color: rgb(76, 76, 223);
+  color: white;
+
+}
+.table{
+  font-family: arial, sans-serif;
+  width: 100%;
+}
+table,tr{
+  font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  border: 1px solid rgb(240, 235, 235);
+
+}
+th,td{
+  padding: 5px;
+
+}
+th{
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  
+  
+}
+.sort{
+  display: flex;
+  justify-content:center;
+
+}
+.iconandinput{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sorticon{
+  margin-top:-3px;
+  text-align: center;
+}
+.search{
+  width: 70%;
+  margin:auto ;
+  margin-bottom: 10px;
+}
+td{
+  font-size: 12px;
+  text-align: center;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+@media only screen and (max-width:1000px){
+  .span{
+    width: 20%;
+  }
+}
+
+@media only screen and (max-width:720px){
+  .table{
+    overflow-x: auto;
+    width: 100%;
+  }
+  
+  .calendarElement{
+    left: 50%;
+    transform: translateX(-55%);
+  }
+  .span{
+    width: 40%;
+  }
+ 
+}
+@media only screen and (max-width:400px){
+  .top{
+    flex-direction: column;
+  }
+  .right{
+    width: 40%;
+    margin-left: 10px;
+  }
+  .span{
+    width: 30%;
+  }
+}
