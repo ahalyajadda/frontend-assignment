@@ -11,6 +11,7 @@ import 'react-date-range/dist/styles.css'
 import 'react-date-range/dist/theme/default.css'
 import {useNavigate,createSearchParams,useSearchParams} from "react-router-dom"
 
+
 //sorting
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
@@ -50,30 +51,26 @@ const useSortableData = (items, config = null) => {
 const usefilterdata=(items,searchitem,columnitem)=>{
   let newsorteditems=[];
   if(columnitem==="date"){
-   newsorteditems= items.filter(item=>moment(`${item[columnitem]}`).format("D MMM YYYY")===searchitem)
+   newsorteditems= items.filter(item=>moment(`${item[columnitem]}`).format("D MMM YYYY")==searchitem)
   }
   else if(columnitem==="revenue"){
-    newsorteditems= items.filter(item=>Math.round(item[columnitem]).toFixed(2)===searchitem);
+    newsorteditems= items.filter(item=>Math.round(item[columnitem]).toFixed(2)==searchitem);
   }
-   else if(columnitem==="fillrate"){
-    newsorteditems= items.filter(item=>Math.round(item[columnitem]).toFixed(2)===searchitem);
-  }
-  else if(columnitem==="ctr"){
-    newsorteditems= items.filter(item=>Math.round(item[columnitem]).toFixed(2)===searchitem);
+   else if(columnitem==="fillrate" || columnitem==="ctr"){
+    newsorteditems= items.filter(item=>Math.round(item[columnitem]).toFixed(2)==searchitem);
   }
   else{
-     newsorteditems= items.filter(item=>item[columnitem]===searchitem);
+     newsorteditems= items.filter(item=>item[columnitem]==searchitem);
     
   }
+  // console.log(items,searchitem,columnitem,newsorteditems);
    return {newsorteditems};
 }
 
 
 const Table = (props) => {
-  
-  let  arraylist=[];    
+  const  [arraylist,setarraylist]=useState([]);    
   let   headclass=[];
-  const apidata=props.data;
   const navigate=useNavigate();
   const [arr,setarr]=useState([]);
   const [searchparams]=useSearchParams();
@@ -81,30 +78,39 @@ const Table = (props) => {
   const [value,setvalue]=useState([searchparams.get('searchvalue')]);
   const [column,setcolumn]=useState([searchparams.get('column')]);
   let   [openmenu,setopenmenu]=useState(true);
-  const [duplicates,setduplicates]=useState([]);
-  const [searchitem,setsearchitem]=useState([]);
-  const [columnitem,setcolumnitem]=useState([]);
+  const [duplicates,setduplicates]=useState([searchparams.get('columnshided')?.split(',')]);
+  const [searchitem,setsearchitem]=useState([searchparams.get('searchvalue')]);
+  const [columnitem,setcolumnitem]=useState([searchparams.get('column')]);
   const [columnheaders,setheadername]=useState(props.columndata);
   const [columndata,setcolumndata]=useState(props.columndata);
+  const apidata=props.data;
   const [array,setarray]=useState([searchparams.get('swaporder')?.split(',')]);
   const [swaporder,setswaporder]=useState(props.columndata);
   const [orderingcolumn,setorderingcolumn]=useState([]);
+  const [swap,setswapp]=useState([]);
+  // console.log(apidata,columnheaders);
 //datepicker
-
-const swapingorder=()=>{
-   arraylist=(array[0]);
-  if(arraylist?.length>0)setswaporder([]);
-  arraylist?.map((value)=>{
-    {columnheaders.map(item=>{
-    if(value==item.class)setswaporder((prev)=>[...prev,item]);
-  })}
-})
-}
 useEffect(()=>{
-  setarr(duplis[0]);
-  swapingorder();
-},[]);
+const swapingorder=()=>{
+      setswaporder([]);
+      if(array==undefined || array==''){
+        setswaporder(columndata);
+      }else{
+       array[0].map((value)=>{
+        {columnheaders?.map(item=>{
+        if(value==item.class)setswaporder((prev)=>[...prev,item]);
+      })
+    }})
+  }
+  }
+    swapingorder();
+},[])
 
+useEffect(()=>{
+  if(duplis[0]!==undefined)setarr(duplis[0]);
+},[]);
+// console.log(array);
+// console.log(arraylist,swaporder);
 
 const [range, setRange] = useState([
   {
@@ -138,7 +144,7 @@ const hideOnClickOutside = (e) => {
     setOpen(false)
   }
 }
-  
+
 //hiding
 //copying changes
 const applychanges=()=>{
@@ -164,6 +170,8 @@ const removeclose=()=>{
 
 //filtering date based rows
 const orientation = window.innerWidth<760? 'vertical' : 'horizontal';
+const direction = window.innerWidth<400? 'vertical' : 'horizontal';
+
 let startdate=moment(range[0].startDate).format("DD MM YYYY");
 let enddate=moment(range[0].endDate).format("DD MM YYYY");
 useEffect(()=>{
@@ -224,7 +232,6 @@ const dragEnd=(result)=>{
   columnitems.splice(result.source.index,0,addcolumn);
   setcolumndata(columnitems);
 }
-  
     return (
       <div className="App">
         <h3 className="heading">Analytics</h3>
@@ -262,8 +269,8 @@ const dragEnd=(result)=>{
         <DragDropContext onDragEnd={dragEnd}>
           <Droppable
             droppableId="droppable"
-            direction='horizontal'
-            type='column'
+                direction={direction}
+                type='column'
             >
             {(provided)=>(
               <div className="btns"
@@ -281,12 +288,13 @@ const dragEnd=(result)=>{
                            ref={provided.innerRef}
                            {...provided.draggableProps} 
                            {...provided.dragHandleProps}>
-                              <span className="span"
+                            <span className="span"
                                 style={{borderLeft:!(arr?.includes(item.class))?'4px solid blue':''}} 
-                                onClick={()=>{(item.class!=='date' && item.class!=="app_name" && !arr?.includes(item.class))?setarr((oldarr)=>[...oldarr,item.class]):setarr((current)=>current?.filter((name)=>name !==item.class))}}>
+                                onClick={()=>{(item.class!=='date' && item.class!=="app_name" && !arr?.includes(item.class))?setarr((val)=>[...val,item.class]):setarr((current)=>current?.filter((name)=>name!==item.class))}}>
                                   {item.name}
                               </span>
                           </span>
+                      
                         )}
                     </Draggable>
                 ))} 
@@ -306,7 +314,7 @@ const dragEnd=(result)=>{
         <tbody>
           
             <tr>
-              {swaporder.map((item,i)=>
+              {swaporder?.map((item,i)=>
                       !duplicates?.includes(item.class) ?(
                     <th> 
                       <span className='iconandinput'>
@@ -323,7 +331,7 @@ const dragEnd=(result)=>{
               )}
             </tr>
          
-            {newsorteditems.length>0 && value.length>0 && columndataitems.map((item,index) => (
+            {newsorteditems.length>0 && value!='' && columndataitems.map((item,index) => (
               <tr key={index}>
                      {swaporder.map((header,i)=>{
                       if(header.class==='date') return (duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate)  ? (""):(<td  className="leftalign"> {moment(`${item.date}`).format("D MMM YYYY")}{" "}</td>));
@@ -335,7 +343,7 @@ const dragEnd=(result)=>{
                     })}
               </tr>
             ))}
-            { newsorteditems.length===0 && value!==null && items.map((item,index) => (
+            { newsorteditems.length===0 && value=='' && items.map((item,index) => (
               <tr key={index}>
                 {swaporder.map((header,i)=>{
                   if(header.class==='date') return (duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate)  ? (""):(<td  className="leftalign"> {moment(`${item.date}`).format("D MMM YYYY")}{" "}</td>));
@@ -354,4 +362,5 @@ const dragEnd=(result)=>{
       </div>
     );
 }
+
 export default Table
