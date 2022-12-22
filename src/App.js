@@ -9,7 +9,7 @@ import {
 function App() {
   const [apidata,setData] =useState([]);
   const [appname,setAppname]=useState([]);
-  const [name,setName]=useState('');
+  let name='';
   const [columndata,setColumndata]=useState([
     {
       name:'Date',
@@ -65,8 +65,9 @@ function App() {
  //fetching api's data
 
  //fetching appnames api
+ useEffect(()=>{
   const appdata=()=>{
-    fetch("http://go-dev.greedygame.com/v3/dummy/apps")
+    fetch("https://go-dev.greedygame.com/v3/dummy/apps")
     .then((response)=>response.json())
     .then((actualdata)=>{
       setAppname(actualdata.data);
@@ -75,39 +76,34 @@ function App() {
       console.log(err.message);
     });
   }
-  useEffect(()=>{
   appdata();
  },[]); 
 
 //fetching main api data
 useEffect(() => {
-  appdata();
   const fetchData = () => {
-    fetch("http://go-dev.greedygame.com/v3/dummy/report?startDate=2021-05-01&endDate=2021-05-03")
+    fetch("https://go-dev.greedygame.com/v3/dummy/report?startDate=2021-05-01&endDate=2021-05-03")
       .then((response) => response.json())
       .then((actualData) => {
-        setData(actualData.data.map((item,i)=>(
+        const finaldata=actualData.data.map((item,i)=>(
             {...item,fillrate:item.requests/item.responses,ctr:item.clicks/item.impressions,id:i} 
           )
-        ));
+        );
+        setData(finaldata.map(item=>{
+          {appname.map(value=>{
+            if(item.app_id===value.app_id)name=value.app_name;
+          })}
+          return(
+          {...item,app_name:name}
+          );
+         }));
       })
       .catch((err) => {
         console.log(err.message);
       });
   };
     fetchData();
-  }, []);
-//adding appnames column to main api data  based on app id
-  useEffect(()=>{
-     setData(apidata.map(item=>{
-            {appname.map(value=>{
-              if(item.app_id===value.app_id)setName(value.app_name);
-            })}
-            return(
-            {...item,app_name:name}
-            );
-           }));
-  },[appname]);
+  }, [appname]);
 
   return (
     <Router>
@@ -120,11 +116,3 @@ useEffect(() => {
 }
 
 export default App;
-
-
-
-
-
-
-
-

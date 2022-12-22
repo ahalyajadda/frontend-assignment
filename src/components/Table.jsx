@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useState,useEffect,useRef } from "react";
 import "../App.css";
-import { ArrowDownward,ArrowUpward,Tune,FilterAlt} from '@mui/icons-material';
+import { ArrowDownward,ArrowUpward,Tune,FilterAlt, Login} from '@mui/icons-material';
 import moment from "moment";
 import {DragDropContext,Droppable,Draggable} from "react-beautiful-dnd";
 import { DateRangePicker } from 'react-date-range'
@@ -70,24 +70,42 @@ const usefilterdata=(items,searchitem,columnitem)=>{
 
 
 const Table = (props) => {
+  
+  let  arraylist=[];    
   let   headclass=[];
   const apidata=props.data;
   const navigate=useNavigate();
   const [arr,setarr]=useState([]);
-  const [duplis,setduplis]=useState([]);
-  const [value,setvalue]=useState([]);
-  const [column,setcolumn]=useState([]);
-  let   [openmenu,setopenmenu]=useState(true);
   const [searchparams]=useSearchParams();
+  const [duplis,setduplis]=useState([searchparams.get('columnshided')?.split(',')]);
+  const [value,setvalue]=useState([searchparams.get('searchvalue')]);
+  const [column,setcolumn]=useState([searchparams.get('column')]);
+  let   [openmenu,setopenmenu]=useState(true);
   const [duplicates,setduplicates]=useState([]);
   const [searchitem,setsearchitem]=useState([]);
   const [columnitem,setcolumnitem]=useState([]);
   const [columnheaders,setheadername]=useState(props.columndata);
   const [columndata,setcolumndata]=useState(props.columndata);
-  const [array,setarray]=useState(['date','app_name','responses','requests','revenue','impression','clicks','fillrate','ctr']);
-  const [orderingcolumn,setorderingcolumn]=useState(['date','app_name','responses','requests','revenue','impression','clicks','fillrate','ctr']);
-
+  const [array,setarray]=useState([searchparams.get('swaporder')?.split(',')]);
+  const [swaporder,setswaporder]=useState(props.columndata);
+  const [orderingcolumn,setorderingcolumn]=useState([]);
 //datepicker
+
+const swapingorder=()=>{
+   arraylist=(array[0]);
+  if(arraylist?.length>0)setswaporder([]);
+  arraylist?.map((value)=>{
+    {columnheaders.map(item=>{
+    if(value==item.class)setswaporder((prev)=>[...prev,item]);
+  })}
+})
+}
+useEffect(()=>{
+  setarr(duplis[0]);
+  swapingorder();
+},[]);
+
+
 const [range, setRange] = useState([
   {
     startDate: new Date(),
@@ -124,13 +142,15 @@ const hideOnClickOutside = (e) => {
 //hiding
 //copying changes
 const applychanges=()=>{
-    setduplis(()=>arr.slice());
+    setduplis(()=>arr?.slice());
       headclass=[];
-    setheadername(()=>columndata.slice());
-    columndata.map((item)=>{
+      setheadername(columndata);
+    setswaporder(()=>columndata?.slice());
+
+    columndata?.map((item)=>{
       headclass.push(item.class);
     });
-    setarray(()=>headclass.slice());
+    setarray(()=>headclass?.slice());
 }
 //settings 
 const menuoptions=()=>{
@@ -175,8 +195,9 @@ useEffect(()=>{
   const params={
     searchvalue:[value],
     column:[column],
-    columnshided:duplis.join(','),
-    swaporder:array.join(','),
+    columnshided:duplis?.join(','),
+    swaporder:array?.join(','),
+    
   };
   const options={
     pathname:'/',
@@ -188,10 +209,10 @@ useEffect(()=>{
 useEffect(()=>{
   setsearchitem(searchparams.get('searchvalue'));
   setcolumnitem(searchparams.get('column'));
-  setorderingcolumn(searchparams.get('swaporder'));
- setduplicates(searchparams.get('columnshided'));
-},[searchparams]);
+  setorderingcolumn(searchparams.get('swaporder')?.split(','));
+ setduplicates(searchparams.get('columnshided')?.split(','));
 
+},[searchparams]);
 //reorder
 const dragEnd=(result)=>{
   if(!result.destination)return;
@@ -239,7 +260,7 @@ const dragEnd=(result)=>{
         <div className="hidden" style={{display:openmenu?'none':''}}>
         <h4>Dimensions and Metrics</h4>
         <DragDropContext onDragEnd={dragEnd}>
-          <Droppable 
+          <Droppable
             droppableId="droppable"
             direction='horizontal'
             type='column'
@@ -261,8 +282,8 @@ const dragEnd=(result)=>{
                            {...provided.draggableProps} 
                            {...provided.dragHandleProps}>
                               <span className="span"
-                                style={{borderLeft:!arr.includes(item.class)?"2px solid blue":''}} 
-                                onClick={()=>{item.class!=='date' && item.class!=="app_name" && !arr.includes(item.class)?setarr((oldarr)=>[...oldarr,item.class]):setarr((current)=>current.filter((name)=>name !==item.class))}}>
+                                style={{borderLeft:!(arr?.includes(item.class))?'4px solid blue':''}} 
+                                onClick={()=>{(item.class!=='date' && item.class!=="app_name" && !arr?.includes(item.class))?setarr((oldarr)=>[...oldarr,item.class]):setarr((current)=>current?.filter((name)=>name !==item.class))}}>
                                   {item.name}
                               </span>
                           </span>
@@ -285,7 +306,7 @@ const dragEnd=(result)=>{
         <tbody>
           
             <tr>
-              {columnheaders.map((item,i)=>
+              {swaporder.map((item,i)=>
                       !duplicates?.includes(item.class) ?(
                     <th> 
                       <span className='iconandinput'>
@@ -304,7 +325,7 @@ const dragEnd=(result)=>{
          
             {newsorteditems.length>0 && value.length>0 && columndataitems.map((item,index) => (
               <tr key={index}>
-                     {columnheaders.map((header,i)=>{
+                     {swaporder.map((header,i)=>{
                       if(header.class==='date') return (duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate)  ? (""):(<td  className="leftalign"> {moment(`${item.date}`).format("D MMM YYYY")}{" "}</td>));
                       else if(header.class==='fillrate' || header.class==='ctr' ) return((duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate) ) ? (""):(<td  className="leftalign">{Math.round(item[header.class]).toFixed(2)}%</td>));
                       else if (header.class==='revenue') return((duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate) ) ? (""):(<td  className="leftalign">${Math.round(item[header.class]).toFixed(2)}</td>));
@@ -314,9 +335,9 @@ const dragEnd=(result)=>{
                     })}
               </tr>
             ))}
-            { newsorteditems.length===0 && value.length<1 && items.map((item,index) => (
+            { newsorteditems.length===0 && value!==null && items.map((item,index) => (
               <tr key={index}>
-                {columnheaders.map((header,i)=>{
+                {swaporder.map((header,i)=>{
                   if(header.class==='date') return (duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate)  ? (""):(<td  className="leftalign"> {moment(`${item.date}`).format("D MMM YYYY")}{" "}</td>));
                   else if(header.class==='fillrate' || header.class==='ctr' ) return((duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate) ) ? (""):(<td  className="leftalign">{Math.round(item[header.class]).toFixed(2)}%</td>));
                  else if (header.class==='revenue') return((duplicates?.includes(header.class)  || !((moment(item.date).format("DD MM YYYY")>=startdate) && moment(item.date).format("DD MM YYYY")<=enddate) ) ? (""):(<td  className="leftalign">${Math.round(item[header.class]).toFixed(2)}</td>));
